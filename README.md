@@ -1,0 +1,2 @@
+# Computational-Methods-in-Aerospace-Engineering
+Applications are drawn from aerospace structures, aerodynamics, dynamics and control, and aerospace systems. Techniques covered include numerical integration of systems of ordinary differential equations; numerical discretization of partial differential equations; and probabilistic methods for quantifying the impact of variability. Specific emphasis is given to finite volume methods in fluid mechanics, and finite element methods in structural mechanics.
