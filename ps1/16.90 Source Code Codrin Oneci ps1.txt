@@ -1,0 +1,153 @@
+# code for 16.90 pset 1 by Codrin Oneci
+import numpy as np
+import matplotlib.pyplot as plt
+T=2
+r=np.sqrt(10)
+dt_list=[0.1,0.1/2,0.1/4,0.1/8,0.1/16]
+def f(u):
+    return 10-u*abs(u)
+def f_linearized(u):
+    return 10-r**2+(u-r)*(-2*r)
+def exact_solution(t):
+    return r*(np.e**(2*t*r)-1)/(1+np.e**(2*t*r))
+def FE(f,dt,T=T,u0=0):
+    v = [u0] #aproximations vector, includes initialization
+    prev = u0
+    for n in range (1,int(T/dt)+1):
+        aux=prev+dt*f(prev)
+        v.append(aux)
+        prev = aux
+    return v
+def AB(f,dt,T=T,u0=0):
+    v = [u0] #aproximations vector, includes initialization
+    prevprev = u0
+    prev=u0+dt*f(u0)
+    v.append(prev) #include first approximation computed using FE
+    for n in range (1,int(T/dt)):
+        aux=prev+dt*0.5*(3*f(prev)-f(prevprev))
+        v.append(aux)
+        prevprev=prev
+        prev = aux
+    return v
+def print_FE_sol():
+    for dt in dt_list:
+        plt.plot(np.linspace(0,T,num=int(T/dt)+1),np.array(FE(f,dt)), '.', label=str(dt))
+    plt.plot(np.linspace(0,T,num=int(T/0.001)+1),exact_solution(np.linspace(0,T,num=int(T/0.001)+1)), '--', label="Exact Solution")
+
+    plt.title('Forward Euler Solution Graph')
+    plt.ylabel('Speed (m/s)')
+    plt.xlabel('Time (seconds)')
+
+    plt.legend()
+    #ax=plt.gca()
+    #ax.set_xlim([0,0.2])
+    plt.show()
+def print_AB_sol():
+    for dt in dt_list:
+        plt.plot(np.linspace(0,T,num=int(T/dt)+1),np.array(AB(f,dt)), '.', label=str(dt))
+    plt.plot(np.linspace(0,T,num=int(T/0.001)+1),exact_solution(np.linspace(0,T,num=int(T/0.001)+1)), '--', label="Exact Solution")
+
+    plt.title('Adams-Bashford Solution Graph')
+    plt.ylabel('Speed (m/s)')
+    plt.xlabel('Time (seconds)')
+
+    plt.legend()
+    #ax=plt.gca()
+    #ax.set_xlim([0,0.2])
+    plt.show()
+#print_AB_sol()
+def global_error_evolution():
+    for dt in dt_list:
+        error=abs(np.array(FE(f,dt))-exact_solution(np.linspace(0,T,num=int(T/dt)+1)))
+        print(error.shape[0])
+        #print(error[:int(T/dt)+1].shape)
+        global_error=[np.amax(np.array(error[:n])) for n in range (1,int(T/dt)+2)]
+        print(global_error)
+        #plt.plot(np.linspace(0, T, num=int(T / dt) + 1), np.array(global_error), '*', label=str(dt))
+        plt.plot(np.log(np.linspace(0,T,num=int(T/dt)+1)),np.log(np.array(global_error)), '*', label=str(dt))
+    #plt.plot(np.linspace(0,T,num=int(T/0.001)+1),exact_solution(np.linspace(0,T,num=int(T/0.001)+1)), '--', label="Exact Solution")
+
+    plt.title('Forward Euler Solution global error vs timestep')
+    plt.ylabel('log Global Error ')
+    plt.xlabel('log Time')
+
+    plt.legend()
+    #ax=plt.gca()
+    #ax.set_xlim([0,0.2])
+    plt.show()
+def error_FE_sol():
+    global_error = []
+    for dt in dt_list:
+        error = abs(np.array(FE(f, dt)) - exact_solution(np.linspace(0, T, num=int(T / dt) + 1)))
+        global_error.append(np.amax(np.array(error)))
+        plt.plot(np.log(dt), np.log(np.amax(np.array(error))), '*', label=str(dt))
+        # plt.plot(np.linspace(0, T, num=int(T / dt) + 1), np.array(global_error), '*', label=str(dt))
+    # plt.plot(np.log(np.array(dt_list)),np.log(np.array(global_error)), '*', label=str(dt))
+    # plt.plot(np.linspace(0,T,num=int(T/0.001)+1),exact_solution(np.linspace(0,T,num=int(T/0.001)+1)), '--', label="Exact Solution")
+
+    plt.title('Forward Euler Solution global error vs timestep')
+    plt.ylabel('log(Global Error)')
+    plt.xlabel('log(delta_t)')
+
+    plt.legend()
+    # ax=plt.gca()
+    # ax.set_xlim([0,0.2])
+    plt.show()
+
+def error_AB_sol():
+    global_error=[]
+    for dt in dt_list:
+        error=abs(np.array(AB(f,dt))-exact_solution(np.linspace(0,T,num=int(T/dt)+1)))
+        global_error.append(np.amax(np.array(error)))
+        plt.plot(np.log(dt), np.log(np.amax(np.array(error))), '*', label=str(dt))
+        #plt.plot(np.linspace(0, T, num=int(T / dt) + 1), np.array(global_error), '*', label=str(dt))
+    #plt.plot(np.log(np.array(dt_list)),np.log(np.array(global_error)), '*', label=str(dt))
+    #plt.plot(np.linspace(0,T,num=int(T/0.001)+1),exact_solution(np.linspace(0,T,num=int(T/0.001)+1)), '--', label="Exact Solution")
+
+    plt.title('Adams-Bashford Solution global error vs timestep')
+    plt.ylabel('log(Global Error)')
+    plt.xlabel('log(delta_t)')
+
+    plt.legend()
+    #ax=plt.gca()
+    #ax.set_xlim([0,0.2])
+    plt.show()
+def global_error_AB_FE():
+    for dt in dt_list:
+        error = np.amax(np.array(abs(np.array(AB(f, dt)) - exact_solution(np.linspace(0, T, num=int(T / dt) + 1)))))
+        plt.plot(np.log(dt), np.log(error), '*', label=str(dt)+" AB")
+        print(error)
+        error = np.amax(np.array(abs(np.array(FE(f, dt)) - exact_solution(np.linspace(0, T, num=int(T / dt) + 1)))))
+        plt.plot(np.log(dt), np.log(error), '*', label=str(dt)+' FE')
+        print(error)
+        # plt.plot(np.linspace(0, T, num=int(T / dt) + 1), np.array(global_error), '*', label=str(dt))
+    # plt.plot(np.log(np.array(dt_list)),np.log(np.array(global_error)), '*', label=str(dt))
+    # plt.plot(np.linspace(0,T,num=int(T/0.001)+1),exact_solution(np.linspace(0,T,num=int(T/0.001)+1)), '--', label="Exact Solution")
+
+    plt.title('Adams-Bashford and Forward Euler Solution global error vs timestep')
+    plt.ylabel('log(Global Error)')
+    plt.xlabel('log(delta_t)')
+
+    plt.legend()
+    # ax=plt.gca()
+    # ax.set_xlim([0,0.2])
+    plt.show()
+def print_AB_linearized_sol():
+    dt=1/(160);Tl=3
+    plt.plot(np.linspace(0,Tl,num=int(Tl/dt)+1),np.array(AB(f,dt,T=Tl,u0=-2)), '.', label=str(dt)+" Nonlinearized")
+    #plt.plot(np.linspace(0,T,num=int(T/0.001)+1),exact_solution(np.linspace(0,T,num=int(T/0.001)+1)), '--', label="Exact Solution")
+    plt.plot(np.linspace(0, Tl, num=int(Tl / dt) + 1), np.array(AB(f_linearized, dt, T=Tl, u0=-2)), '.',
+             label=str(dt) + " Linearized")
+    plt.title('Adams-Bashford Solutions Graph')
+    plt.ylabel('Speed (m/s)')
+    plt.xlabel('Time (seconds)')
+
+    plt.legend()
+    #ax=plt.gca()
+    #ax.set_xlim([0,0.2])
+    plt.show()
+#global_error_AB_FE()
+print_AB_linearized_sol()
+#a=np.array([16,22,35,41,995,16,437,48,19])
+#print(np.amax(np.array([a[:n] for n in range (1,10)])))
+#print([np.amax(np.array(a[:n])) for n in range (1,10)])
